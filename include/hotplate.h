@@ -16,15 +16,28 @@
 #define FALSE 0
 #define PRINT_LINE ( printf("Thread %d, at line %d\n", iproc, __LINE__) )
 
+#define MAX_ITERATION 400
+
+#define BLOCK_Y 2
+#define BLOCK_X 1
+#define THREADS_Y 512
+#define THREADS_X 1
+
 /* macro for checking fixed locations */
 #define IS_FIXED(x,y) ( ((x == DOT_X) && (y == DOT_Y))?TRUE:((y == FIXED_ROW) && (x < FIXED_ROW_COL))?TRUE:FALSE )
 
+/* magic numbers for the fixed hot dot and row */
+#define DOT_X 199 /* row 200 */
+#define DOT_Y 499 /* column 500 */
+#define FIXED_ROW 399 /* row 400 */
+#define FIXED_ROW_COL 329 /* last column of the fixed row */
+
 /* macros for plate positioning/indexing */
-#define LOC(x,y) ( (y*plateSize)+x )
-#define LEFT_LOC(x,y) ( (y*plateSize)+(x-1) )
-#define RIGHT_LOC(x,y) ( (y*plateSize)+(x+1))
-#define LOWER_LOC(x,y) ( ((y-1)*(plateSize))+x )
-#define UPPER_LOC(x,y) ( ((y+1)*(plateSize))+x )
+#define LOC_H(x,y) ( (y*PLATE_SIZE)+x )
+#define LEFT_LOC_H(x,y) ( (y*PLATE_SIZE)+(x-1) )
+#define RIGHT_LOC_H(x,y) ( (y*PLATE_SIZE)+(x+1))
+#define LOWER_LOC_H(x,y) ( ((y-1)*(PLATE_SIZE))+x )
+#define UPPER_LOC_H(x,y) ( ((y+1)*(PLATE_SIZE))+x )
 
 /* take care of device emulation... */
 #ifdef __DEVICE_EMULATION__
@@ -32,4 +45,7 @@
 #else
 #define EMUSYNC
 #endif
+
+/* a boolean type */
+typedef int abool_t;
 
