@@ -19,9 +19,9 @@
 #define MAX_ITERATION 400
 
 #define BLOCK_Y 2
-#define BLOCK_X 1
+#define BLOCK_X 2
 #define THREADS_Y 512
-#define THREADS_X 1
+#define THREADS_X 512
 
 /* macro for checking fixed locations */
 #define IS_FIXED(x,y) ( ((x == DOT_X) && (y == DOT_Y))?TRUE:((y == FIXED_ROW) && (x < FIXED_ROW_COL))?TRUE:FALSE )
@@ -35,7 +35,7 @@
 /* macros for plate positioning/indexing */
 #define LOC_H(x,y) ( (y*PLATE_SIZE)+x )
 #define LEFT_LOC_H(x,y) ( (y*PLATE_SIZE)+(x-1) )
-#define RIGHT_LOC_H(x,y) ( (y*PLATE_SIZE)+(x+1))
+#define RIGHT_LOC_H(x,y) ( (y*PLATE_SIZE)+(x+1) )
 #define LOWER_LOC_H(x,y) ( ((y-1)*(PLATE_SIZE))+x )
 #define UPPER_LOC_H(x,y) ( ((y+1)*(PLATE_SIZE))+x )
 

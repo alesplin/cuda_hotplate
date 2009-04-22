@@ -12,6 +12,26 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
+/* calculation kernel */
+__global__ void runCalc(float *old_d, float *new_d) {
+    /* copy a chunk of the plate to shared mem */
+
+    /* get realY of thread 0 here to get a pointer into the plate where we
+    need to copy from... */
+
+    int y = (blockIdx.y*blockDim.y) + threadIdx.y;
+    int x = (blockIdx.x*blockDim.x) + threadIdx.x;
+
+    /* calculate my spot and bail */
+    new_d[LOC_H(x,y)] = (float)(old_d[LEFT_LOC_H(x,y)]
+                    + old_d[RIGHT_LOC_H(x,y)]
+                    + old_d[LOWER_LOC_H(x,y)]
+                    + old_d[UPPER_LOC_H(x,y)]
+                    + 4 * old_d[LOC_H(x,y)] ) / 8;
+}
+
+/* check for steady kernel */
+
 int main(int argc, char *argv[]) {
     /* stuff we'll need */
     float *oldPlate_d;
