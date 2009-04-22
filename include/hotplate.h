@@ -14,7 +14,7 @@
 #define WARM_START 50.0f
 #define TRUE 1
 #define FALSE 0
-#define PRINT_LINE ( printf("Thread %d, at line %d\n", iproc, __LINE__) )
+#define PRINT_LINE ( printf("(%d,%d) at %d\n", x,y, __LINE__) )
 
 #define MAX_ITERATION 400
 
@@ -48,4 +48,7 @@
 
 /* a boolean type */
 typedef int abool_t;
+
+/* timing function */
+double getTime();
 
