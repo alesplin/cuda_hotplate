@@ -21,6 +21,7 @@ __global__ void runCalc(float *old_d, float *new_d) {
 
     int y = (blockIdx.y*blockDim.y) + threadIdx.y;
     int x = (blockIdx.x*blockDim.x) + threadIdx.x;
+    printf("thread (%d,%d) checking in...\n", x,y);
 
     /* bail if we're on an edge... */
     if((x == 0) || (x == PLATE_SIZE - 1) || (y == 0) || (y == PLATE_SIZE - 1)) {
@@ -123,6 +124,7 @@ int main(int argc, char *argv[]) {
     start = getTime();
     while((!allSteady) && (iteration < MAX_ITERATION)) {
         /* run calculation kernel */
+        /*printf("main at %d...\n", __LINE__);*/
         runCalc<<<calcGrid,calcBlock>>>(oldPlate_d, newPlate_d);
         
         /* synchronize */
