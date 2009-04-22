@@ -111,7 +111,11 @@ int main(int argc, char *argv[]) {
     
     /* get our grids/blocks all ready... */
     dim3 calcGrid;
+    calcGrid.x = BLOCKS_X;
+    calcGrid.y = BLOCKS_Y;
     dim3 calcBlock;
+    calcBlock.x = THREADS_X;
+    calcBlock.y = THREADS_Y;
 
     dim3 checkGrid;
     dim3 checkBlock;
@@ -119,6 +123,7 @@ int main(int argc, char *argv[]) {
     start = getTime();
     while((!allSteady) && (iteration < MAX_ITERATION)) {
         /* run calculation kernel */
+        runCalc<<<calcGrid,calcBlock>>>(oldPlate_d, newPlate_d);
         
         /* synchronize */
 
@@ -138,7 +143,7 @@ int main(int argc, char *argv[]) {
     }
     end = getTime();
     et = end - start;
-    printf("Ran in %0.4f seconds...\n", et);
+    printf("%d iterations in %0.4f seconds...\n", iteration, et);
 
     free(oldPlate_h);
     free(newPlate_h);

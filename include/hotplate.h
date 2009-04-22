@@ -18,8 +18,8 @@
 
 #define MAX_ITERATION 400
 
-#define BLOCK_Y 2
-#define BLOCK_X 2
+#define BLOCKS_Y 2
+#define BLOCKS_X 2
 #define THREADS_Y 512
 #define THREADS_X 512
 
