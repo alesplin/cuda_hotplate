@@ -5,6 +5,7 @@
 #include "hotplate.h"
 #include <stdio.h>
 #include <unistd.h>
+#include <math.h>
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
@@ -14,19 +15,17 @@
 
 /* calculation kernel */
 __global__ void runCalc(float *old_d, float *new_d) {
-    /* copy a chunk of the plate to shared mem */
 
-    /* get realY of thread 0 here to get a pointer into the plate where we
-    need to copy from... */
-
+    /* get our thread's coordinates */
     int y = (blockIdx.y*blockDim.y) + threadIdx.y;
     int x = (blockIdx.x*blockDim.x) + threadIdx.x;
-    printf("thread (%d,%d) checking in...\n", x,y);
+    printf("thread (%d,%d) calculating in...\n", x,y);
 
     /* bail if we're on an edge... */
     if((x == 0) || (x == PLATE_SIZE - 1) || (y == 0) || (y == PLATE_SIZE - 1)) {
         return;
     }
+
     PRINT_LINE;
     /* calculate my spot and bail */
     if(!IS_FIXED(x,y)) {
@@ -36,6 +35,31 @@ __global__ void runCalc(float *old_d, float *new_d) {
                         + old_d[UPPER_LOC_H(x,y)]
                         + 4 * old_d[LOC_H(x,y)] ) / 8;
     }
+}
+
+/* check to see if we're in a "steady" state */
+__global__ void runCheck(float *old_d, float *new_d, abool_t *allSteady_d) {
+    /* get our coordinates */
+    int y = (blockIdx.y*blockDim.y) + threadIdx.y;
+    int x = (blockIdx.x*blockDim.x) + threadIdx.x;
+    printf("thread (%d,%d) checking...\n", x,y);
+
+    /* bail if we're on an edge... */
+    if((x == 0) || (x == PLATE_SIZE - 1) || (y == 0) || (y == PLATE_SIZE - 1)) {
+        return;
+    }
+
+    /* check my spot; if not steady, set the allSteady to false */
+    if((*allSteady_d == TRUE) && (!IS_FIXED(x,y))) {
+        float me = new_d[LOC_H(x,y)];
+        float neighborAvg = (new_d[LEFT_LOC_H(x,y)]
+                        + new_d[RIGHT_LOC_H(x,y)]
+                        + new_d[LOWER_LOC_H(x,y)]
+                        + new_d[UPPER_LOC_H(x,y)]) / 4;
+        if(fabsf(me - neighborAvg) >= STEADY_THRESHOLD) {
+            *allSteady_d = FALSE;
+        }
+    } /* END if not steady and not fixed */
 }
 
 /* check for steady kernel */
@@ -50,14 +74,17 @@ int main(int argc, char *argv[]) {
     float *oldPlate_h;
     float *newPlate_h;
     float *tmpPlate_d;
-    abool_t allSteady = FALSE;
+    abool_t *allSteady_h;
+    abool_t *allSteady_d;
     int iteration = 0;
 
     oldPlate_h = (float*) calloc(PLATE_AREA, sizeof(float));
     newPlate_h = (float*) calloc(PLATE_AREA, sizeof(float));
+    allSteady_h = (abool_t*) calloc(1,sizeof(abool_t));
 
     cudaMalloc((void**) &oldPlate_d, PLATE_AREA * sizeof(float));
     cudaMalloc((void**) &newPlate_d, PLATE_AREA * sizeof(float));
+    cudaMalloc((void**) &allSteady_d, sizeof(abool_t));
 
     /* initialize plates */
     int x, y;
@@ -119,19 +146,28 @@ int main(int argc, char *argv[]) {
     calcBlock.y = THREADS_Y;
 
     dim3 checkGrid;
+    checkGrid.x = BLOCKS_X;
+    checkGrid.y = BLOCKS_Y;
     dim3 checkBlock;
+    checkBlock.x = THREADS_X;
+    checkBlock.y = THREADS_Y;
 
     start = getTime();
-    while((!allSteady) && (iteration < MAX_ITERATION)) {
+    while((*allSteady_h != TRUE) && (iteration < MAX_ITERATION)) {
+        *allSteady_h = TRUE;
+        cudaMemcpy(allSteady_d,
+                allSteady_h,
+                sizeof(abool_t),
+                cudaMemcpyHostToDevice);
         /* run calculation kernel */
         /*printf("main at %d...\n", __LINE__);*/
         runCalc<<<calcGrid,calcBlock>>>(oldPlate_d, newPlate_d);
-        
         /* synchronize */
 
         /* synchronize and run check kernel every other iteration */
         if(iteration ^ 1) { /* XOR faster than mod... */
             cudaThreadSynchronize();
+            runCheck<<<checkGrid,checkBlock>>>(oldPlate_d, newPlate_d, allSteady_d);
         }
 
         cudaThreadSynchronize();
@@ -142,6 +178,10 @@ int main(int argc, char *argv[]) {
         
         /* increment iteration count */
         iteration++;
+        cudaMemcpy(allSteady_h,
+                allSteady_d,
+                sizeof(abool_t),
+                cudaMemcpyDeviceToHost);
     }
     end = getTime();
     et = end - start;
