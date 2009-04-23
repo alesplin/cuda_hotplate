@@ -15,18 +15,17 @@
 
 /* calculation kernel */
 __global__ void runCalc(float *old_d, float *new_d) {
-
     /* get our thread's coordinates */
     int y = (blockIdx.y*blockDim.y) + threadIdx.y;
     int x = (blockIdx.x*blockDim.x) + threadIdx.x;
-    printf("thread (%d,%d) calculating in...\n", x,y);
+    /*printf("thread (%d,%d) calculating in...\n", x,y);*/
 
     /* bail if we're on an edge... */
     if((x == 0) || (x == PLATE_SIZE - 1) || (y == 0) || (y == PLATE_SIZE - 1)) {
         return;
     }
 
-    PRINT_LINE;
+    /*PRINT_LINE;*/
     /* calculate my spot and bail */
     if(!IS_FIXED(x,y)) {
         new_d[LOC_H(x,y)] = (float)(old_d[LEFT_LOC_H(x,y)]
@@ -42,7 +41,7 @@ __global__ void runCheck(float *old_d, float *new_d, abool_t *allSteady_d) {
     /* get our coordinates */
     int y = (blockIdx.y*blockDim.y) + threadIdx.y;
     int x = (blockIdx.x*blockDim.x) + threadIdx.x;
-    printf("thread (%d,%d) checking...\n", x,y);
+    /*printf("thread (%d,%d) checking...\n", x,y);*/
 
     /* bail if we're on an edge... */
     if((x == 0) || (x == PLATE_SIZE - 1) || (y == 0) || (y == PLATE_SIZE - 1)) {
@@ -58,6 +57,7 @@ __global__ void runCheck(float *old_d, float *new_d, abool_t *allSteady_d) {
                         + new_d[UPPER_LOC_H(x,y)]) / 4;
         if(fabsf(me - neighborAvg) >= STEADY_THRESHOLD) {
             *allSteady_d = FALSE;
+            /*printf("(%d,%d) set allSteady_d to: %d\n", x,y,*allSteady_d);*/
         }
     } /* END if not steady and not fixed */
 }
@@ -87,43 +87,43 @@ int main(int argc, char *argv[]) {
     cudaMalloc((void**) &allSteady_d, sizeof(abool_t));
 
     /* initialize plates */
-    int x, y;
-    printf("main at %d...\n", __LINE__);
-    for(y = 1; y < PLATE_SIZE - 1; y++) {
-        for(x = 1; x < PLATE_SIZE - 1; x++) {
-            oldPlate_h[LOC_H(x,y)] = WARM_START;
-            newPlate_h[LOC_H(x,y)] = WARM_START;
+        int x, y;
+        printf("main at %d...\n", __LINE__);
+        for(y = 1; y < PLATE_SIZE - 1; y++) {
+            for(x = 1; x < PLATE_SIZE - 1; x++) {
+                oldPlate_h[LOC_H(x,y)] = WARM_START;
+                newPlate_h[LOC_H(x,y)] = WARM_START;
+            }
         }
-    }
 
-    printf("main at %d...\n", __LINE__);
-    /* initialize the edges */
-    for(x = 0; x < PLATE_SIZE; x++) {
-        /* do the bottom edge */
-        oldPlate_h[LOC_H(x,0)] = HOT_START;
-        newPlate_h[LOC_H(x,0)] = HOT_START;
-        /*printf("Column %d in row 0\n", LOC(x,0));*/
-        /* do the left edge */
-        oldPlate_h[LOC_H(0,x)] = COLD_START;
-        newPlate_h[LOC_H(0,x)] = COLD_START;
-        /*printf("Row %d in column 0\n", LOC(x,0));*/
-        /* do the right edge */
-        oldPlate_h[LOC_H(PLATE_SIZE-1,x)] = COLD_START;
-        newPlate_h[LOC_H(PLATE_SIZE-1,x)] = COLD_START;
-        /*printf("Row %d in column %d\n", LOC(x,0),PLATE_SIZE-1);*/
-    }
+        printf("main at %d...\n", __LINE__);
+        /* initialize the edges */
+        for(x = 0; x < PLATE_SIZE; x++) {
+            /* do the bottom edge */
+            oldPlate_h[LOC_H(x,0)] = HOT_START;
+            newPlate_h[LOC_H(x,0)] = HOT_START;
+            /*printf("Column %d in row 0\n", LOC(x,0));*/
+            /* do the left edge */
+            oldPlate_h[LOC_H(0,x)] = COLD_START;
+            newPlate_h[LOC_H(0,x)] = COLD_START;
+            /*printf("Row %d in column 0\n", LOC(x,0));*/
+            /* do the right edge */
+            oldPlate_h[LOC_H(PLATE_SIZE-1,x)] = COLD_START;
+            newPlate_h[LOC_H(PLATE_SIZE-1,x)] = COLD_START;
+            /*printf("Row %d in column %d\n", LOC(x,0),PLATE_SIZE-1);*/
+        }
 
-    printf("main at %d...\n", __LINE__);
-    /* initialize our hot row */
-    for(x = 0; x < FIXED_ROW_COL; x++) {
-        oldPlate_h[LOC_H(x,FIXED_ROW)] = HOT_START;
-        newPlate_h[LOC_H(x,FIXED_ROW)] = HOT_START;
-    }
+        printf("main at %d...\n", __LINE__);
+        /* initialize our hot row */
+        for(x = 0; x < FIXED_ROW_COL; x++) {
+            oldPlate_h[LOC_H(x,FIXED_ROW)] = HOT_START;
+            newPlate_h[LOC_H(x,FIXED_ROW)] = HOT_START;
+        }
 
-    printf("main at %d...\n", __LINE__);
-    /* initialize our lonely hot dot */
-    oldPlate_h[LOC_H(DOT_X,DOT_Y)] = HOT_START;
-    newPlate_h[LOC_H(DOT_X,DOT_Y)] = HOT_START;
+        printf("main at %d...\n", __LINE__);
+        /* initialize our lonely hot dot */
+        oldPlate_h[LOC_H(DOT_X,DOT_Y)] = HOT_START;
+        newPlate_h[LOC_H(DOT_X,DOT_Y)] = HOT_START;
 
     printf("main at %d...\n", __LINE__);
     cudaMemcpy((void*)oldPlate_d,
@@ -131,34 +131,34 @@ int main(int argc, char *argv[]) {
                 PLATE_AREA * sizeof(float),
                 cudaMemcpyHostToDevice);
 
+
     printf("main at %d...\n", __LINE__);
     cudaMemcpy((void*)newPlate_d,
                 (void*) newPlate_h,
                 PLATE_AREA * sizeof(float),
                 cudaMemcpyHostToDevice);
     
-    /* get our grids/blocks all ready... */
-    dim3 calcGrid;
-    calcGrid.x = BLOCKS_X;
-    calcGrid.y = BLOCKS_Y;
-    dim3 calcBlock;
-    calcBlock.x = THREADS_X;
-    calcBlock.y = THREADS_Y;
 
-    dim3 checkGrid;
-    checkGrid.x = BLOCKS_X;
-    checkGrid.y = BLOCKS_Y;
-    dim3 checkBlock;
-    checkBlock.x = THREADS_X;
-    checkBlock.y = THREADS_Y;
+    /* get our grids/blocks all ready... */
+        dim3 calcGrid;
+        calcGrid.x = BLOCKS_X;
+        calcGrid.y = BLOCKS_Y;
+        dim3 calcBlock;
+        calcBlock.x = THREADS_X;
+        calcBlock.y = THREADS_Y;
+
+        dim3 checkGrid;
+        checkGrid.x = BLOCKS_X;
+        checkGrid.y = BLOCKS_Y;
+        dim3 checkBlock;
+        checkBlock.x = THREADS_X;
+        checkBlock.y = THREADS_Y;
 
     start = getTime();
     while((*allSteady_h != TRUE) && (iteration < MAX_ITERATION)) {
-        *allSteady_h = TRUE;
-        cudaMemcpy(allSteady_d,
-                allSteady_h,
-                sizeof(abool_t),
-                cudaMemcpyHostToDevice);
+        /*printf("main at %d...\n", __LINE__);*/
+
+
         /* run calculation kernel */
         /*printf("main at %d...\n", __LINE__);*/
         runCalc<<<calcGrid,calcBlock>>>(oldPlate_d, newPlate_d);
@@ -166,6 +166,12 @@ int main(int argc, char *argv[]) {
 
         /* synchronize and run check kernel every other iteration */
         if(iteration ^ 1) { /* XOR faster than mod... */
+            *allSteady_h = TRUE;
+            printf("main set allSteady_h to %d\n", *allSteady_h);
+            cudaMemcpy(allSteady_d,
+                    allSteady_h,
+                    sizeof(abool_t),
+                    cudaMemcpyHostToDevice);
             cudaThreadSynchronize();
             runCheck<<<checkGrid,checkBlock>>>(oldPlate_d, newPlate_d, allSteady_d);
         }

@@ -18,10 +18,10 @@
 
 #define MAX_ITERATION 400
 
-#define BLOCKS_Y 2
-#define BLOCKS_X 2
-#define THREADS_Y 512
-#define THREADS_X 512
+#define BLOCKS_Y 64
+#define BLOCKS_X 64
+#define THREADS_Y 16
+#define THREADS_X 16
 
 /* macro for checking fixed locations */
 #define IS_FIXED(x,y) ( ((x == DOT_X) && (y == DOT_Y))?TRUE:((y == FIXED_ROW) && (x < FIXED_ROW_COL))?TRUE:FALSE )
