@@ -1,0 +1,10 @@
+IS_FIXED	include/hotplate.h	/^#define IS_FIXED(x,y) ( ((x == DOT_X) && (y == DOT/
+LEFT_LOC_H	include/hotplate.h	/^#define LEFT_LOC_H(x,y) ( (y*PLATE_SIZE)+(x-1) )$/
+LOC_H	include/hotplate.h	/^#define LOC_H(x,y) ( (y*PLATE_SIZE)+x )$/
+LOWER_LOC_H	include/hotplate.h	/^#define LOWER_LOC_H(x,y) ( ((y-1)*(PLATE_SIZE))+x /
+Mhotplate.cu	src/hotplate.cu	/^int main(int argc, char *argv[]) {$/
+RIGHT_LOC_H	include/hotplate.h	/^#define RIGHT_LOC_H(x,y) ( (y*PLATE_SIZE)+(x+1) )$/
+UPPER_LOC_H	include/hotplate.h	/^#define UPPER_LOC_H(x,y) ( ((y+1)*(PLATE_SIZE))+x /
+abool_t	include/hotplate.h	/^typedef int abool_t;$/
+getTime	src/hotplate.cu	/^double getTime() {$/
+runCalc	src/hotplate.cu	/^__global__ void runCalc(float *old_d, float *new_d/
