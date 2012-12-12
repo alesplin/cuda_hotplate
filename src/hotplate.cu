@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 
     /* initialize plates */
         int x, y;
-        printf("main at %d...\n", __LINE__);
+        /*printf("main at %d...\n", __LINE__);*/
         for(y = 1; y < PLATE_SIZE - 1; y++) {
             for(x = 1; x < PLATE_SIZE - 1; x++) {
                 oldPlate_h[LOC_H(x,y)] = WARM_START;
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        printf("main at %d...\n", __LINE__);
+        /*printf("main at %d...\n", __LINE__);*/
         /* initialize the edges */
         for(x = 0; x < PLATE_SIZE; x++) {
             /* do the bottom edge */
@@ -113,26 +113,26 @@ int main(int argc, char *argv[]) {
             /*printf("Row %d in column %d\n", LOC(x,0),PLATE_SIZE-1);*/
         }
 
-        printf("main at %d...\n", __LINE__);
+        /*printf("main at %d...\n", __LINE__);*/
         /* initialize our hot row */
         for(x = 0; x < FIXED_ROW_COL; x++) {
             oldPlate_h[LOC_H(x,FIXED_ROW)] = HOT_START;
             newPlate_h[LOC_H(x,FIXED_ROW)] = HOT_START;
         }
 
-        printf("main at %d...\n", __LINE__);
+        /*printf("main at %d...\n", __LINE__);*/
         /* initialize our lonely hot dot */
         oldPlate_h[LOC_H(DOT_X,DOT_Y)] = HOT_START;
         newPlate_h[LOC_H(DOT_X,DOT_Y)] = HOT_START;
 
-    printf("main at %d...\n", __LINE__);
+    /*printf("main at %d...\n", __LINE__);*/
     cudaMemcpy((void*)oldPlate_d,
                 (void*) oldPlate_h,
                 PLATE_AREA * sizeof(float),
                 cudaMemcpyHostToDevice);
 
 
-    printf("main at %d...\n", __LINE__);
+    /*printf("main at %d...\n", __LINE__);*/
     cudaMemcpy((void*)newPlate_d,
                 (void*) newPlate_h,
                 PLATE_AREA * sizeof(float),
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
         /* synchronize and run check kernel every other iteration */
         if(iteration ^ 1) { /* XOR faster than mod... */
             *allSteady_h = TRUE;
-            printf("main set allSteady_h to %d\n", *allSteady_h);
+            /*printf("main set allSteady_h to %d\n", *allSteady_h);*/
             cudaMemcpy(allSteady_d,
                     allSteady_h,
                     sizeof(abool_t),

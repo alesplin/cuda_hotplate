@@ -9,8 +9,8 @@ EXE = bin/Hotplate
 CUDA_PATH = /usr/local/cuda
 LIBDIR = $(CUDA_PATH)/lib
 
-CC = nvcc
-FLAGS = -Iinclude -I$(CUDA_PATH)/include -L$(LIBDIR) -O3 -g -deviceemu
+CC = /usr/local/cuda/bin/nvcc
+FLAGS = -Iinclude -I$(CUDA_PATH)/include -L$(LIBDIR) -O3 -g
 
 bin: $(OBJ)
 	$(CC) $(FLAGS) $(OBJ) -o $(EXE)
