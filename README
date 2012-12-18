@@ -1,0 +1,4 @@
+CUDA implementation of the hotplate problem.
+
+I used 1 thread per location on the plate.  This was fast, but there may be a
+better mechanism for sharing data between rows.
